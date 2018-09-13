@@ -390,11 +390,52 @@ void afficherPattes()
    // (partie 1) MODIFICATIONS ICI ...
    matrModel.PushMatrix();{
 	  matrModel.Scale(bestiole.largPatte, bestiole.largPatte, bestiole.longPatte);
-      matrModel.Translate( 0.0, -3.0, 0.0 ); // (bidon) À MODIFIER
+      matrModel.Translate( bestiole.position[0], bestiole.position[1], bestiole.position[2] ); 
+      
+      //patte 1
+   matrModel.PushMatrix(); {
+	   //placer la patte sur l arrete du cylindre
+	   matrModel.Translate(4.0, 3.0, -0.2);
+	   matrModel.Rotate(bestiole.anglePatte,0.0, 0.0, 1.0);
+	   
+	   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+	   afficherCube();   
+	 } matrModel.PopMatrix();
+      
       // afficherRepereCourant( ); // débogage
-      glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-      afficherCube();
-   }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      
+      //patte 2
+   matrModel.PushMatrix(); {
+	   //placer la patte sur l arrete du cylindre
+	   matrModel.Translate(-4.0, 3.0, -0.2);
+	   matrModel.Rotate(bestiole.anglePatte,0.0, 0.0, 1.0);
+	   
+	   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+	   afficherCube();   
+	 } matrModel.PopMatrix(); 	 
+	 
+	 //patte 3
+   matrModel.PushMatrix(); {
+	   //placer la patte sur l arrete du cylindre
+	   matrModel.Translate(-4.0, -3.0, -0.2);
+	   matrModel.Rotate(bestiole.anglePatte,0.0, 0.0, 1.0);
+	   
+	   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+	   afficherCube();   
+	 } matrModel.PopMatrix(); 
+	 
+	  //patte 4
+   matrModel.PushMatrix(); {
+	   //placer la patte sur l arrete du cylindre
+	   matrModel.Translate(4.0, -3.0, -0.2);
+	   matrModel.Rotate(bestiole.anglePatte,0.0, 0.0, 1.0);
+	   
+	   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+	   afficherCube();   
+	 } matrModel.PopMatrix(); 
+      
+   }matrModel.PopMatrix(); 
+   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
 }
 
 void afficherBestiole()
