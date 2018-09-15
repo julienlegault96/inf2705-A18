@@ -353,7 +353,7 @@ void afficherAiles()
 
    matrModel.PushMatrix(); {
 	  // Applique la translation et rotation du corps aux ailes.
-      matrModel.Translate( bestiole.position[0], bestiole.position[1], bestiole.position[2] + bestiole.taille / 2);
+    matrModel.Translate( bestiole.position[0], bestiole.position[1], bestiole.position[2] + bestiole.taille / 2);
 	  matrModel.Rotate( bestiole.angleCorps, 0.0, 0.0, 1.0 );
 	  // Scaling des  ailes
       matrModel.Scale(2 * bestiole.taille, 2 * bestiole.taille, 2 * bestiole.taille);
@@ -384,59 +384,52 @@ void afficherAiles()
 // afficher les quatre pattes
 void afficherPattes()
 {
-   glVertexAttrib3f( locColor, 0.5, 0.5, 1.0 ); // bleu foncé; équivalent au glColor() de OpenGL 2.x
+   glVertexAttrib3f( locColor, 0.5, 0.5, 1.0 ); // bleu foncé
 
-   // ajouter une ou des transformations afin de tracer les pattes de largeur "bestiole.largPatte" et longueur "bestiole.longPatte"
-    matrModel.PushMatrix();{
-	  matrModel.Translate( bestiole.position[0], bestiole.position[1], bestiole.position[2] ); 
-	  matrModel.Rotate( bestiole.angleCorps, 0.0, 0.0, 1.0 );
-	  matrModel.Scale(bestiole.largPatte, bestiole.largPatte, bestiole.longPatte);            
-      //patte 1
-   matrModel.PushMatrix(); {
-	   //placer la patte sur l arrete du cylindre
-	   matrModel.Translate(4.0, 4.0, -0.2);
-	   //matrModel.Rotate(-bestiole.anglePatte,1.0, 1.0, 0.0);	   
-	   matrModel.Translate( 0.0, 0.0, -1.0);
-	   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-	   afficherCube();   
-	 } matrModel.PopMatrix();
+      matrModel.PushMatrix();{      
+       // Applique la translation et rotation du corps aux pattes.
+      matrModel.Translate( bestiole.position[0], bestiole.position[1], bestiole.position[2] ); 
+      matrModel.Rotate(bestiole.angleCorps, 0.0, 0.0, 1.0 ); 
       
-      // afficherRepereCourant( ); // débogage
-      
-      //patte 2
-   matrModel.PushMatrix(); {
-	   //placer la patte sur l arrete du cylindre
-	   matrModel.Translate(-4.0, 4.0, -0.2);
-	   //matrModel.Rotate(bestiole.anglePatte,1.0, 1.0, 0.0);	 
-	   matrModel.Translate( 0.0, 0.0, -1.0);  
-	   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-	   afficherCube();   
-	 } matrModel.PopMatrix(); 	 
-	 
-	 //patte 3
-   matrModel.PushMatrix(); {
-	   //placer la patte sur l arrete du cylindre
-	   matrModel.Translate(-4.0, -4.0, -0.2);
-	   //matrModel.Rotate(bestiole.anglePatte,1.0, 1.0, 0.0);
-	   matrModel.Translate( 0.0, 0.0, -1.0);
-	   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-	   afficherCube();   
-	 } matrModel.PopMatrix(); 
-	 
-	  //patte 4
-   matrModel.PushMatrix(); {
-	   //placer la patte sur l arrete du cylindre
-	   matrModel.Translate(4.0, -4.0, -0.2);
-	   //matrModel.Rotate(bestiole.anglePatte,1.0, 1.0, 0.0);
-	   matrModel.Translate( 0.0, 0.0, -1.0);
-	   glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-	   afficherCube();   
-	 } matrModel.PopMatrix(); 
-      
+      // Patte 1
+      matrModel.PushMatrix();{   
+      // place la patte sur l'arete du cylindre         
+      matrModel.Translate(bestiole.taille, 0.85*bestiole.taille,-bestiole.taille);
+      matrModel.Rotate(-bestiole.anglePatte,-1.0, 1.0, 0.0); 
+      // Scalling des Pattes     
+      matrModel.Scale(bestiole.largPatte, bestiole.largPatte, bestiole.longPatte);     
+      glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      afficherCube();
+      } matrModel.PopMatrix();
+       // Patte 2
+      matrModel.PushMatrix();{          
+      matrModel.Translate(bestiole.taille, -0.85*bestiole.taille,-bestiole.taille);
+      matrModel.Rotate(-bestiole.anglePatte,1.0, 1.0, 0.0); 
+       matrModel.Scale(bestiole.largPatte, bestiole.largPatte, bestiole.longPatte);     
+      glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      afficherCube();
+      } matrModel.PopMatrix();  
+      // Patte 3
+      matrModel.PushMatrix();{          
+      matrModel.Translate(-bestiole.taille, 0.85*bestiole.taille,-bestiole.taille);
+      matrModel.Rotate(-bestiole.anglePatte,-1.0, -1.0, 0.0); 
+       matrModel.Scale(bestiole.largPatte, bestiole.largPatte, bestiole.longPatte);     
+      glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      afficherCube();
+      } matrModel.PopMatrix();  
+      // Patte 4
+      matrModel.PushMatrix();{          
+      matrModel.Translate(-bestiole.taille, -0.85*bestiole.taille,-bestiole.taille);
+      matrModel.Rotate(-bestiole.anglePatte,1.0, -1.0, 0.0); 
+       matrModel.Scale(bestiole.largPatte, bestiole.largPatte, bestiole.longPatte);     
+      glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      afficherCube();
+      } matrModel.PopMatrix();   
+    
    }matrModel.PopMatrix(); 
    glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
 }
-
+     
 void afficherBestiole()
 {
    // afficherRepereCourant( ); // débogage
