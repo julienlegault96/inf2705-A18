@@ -213,11 +213,23 @@ void FenetreTP::initialiser()
    glBindVertexArray( vao[1] );
 
    // (partie 2) MODIFICATIONS ICI ...
-   // créer le VBO pour les sommets
-   // ...
+      
+   // generer le VBO
+    glGenBuffers(1, &vboTheiereSommets);
+   // lier l objet 
+    glBindBuffer(GL_ARRAY_BUFFER, vboTheiereSommets);
+   // Chargement du tableau de sommets sur le serveur
+    glBufferData(GL_ARRAY_BUFFER, sizeof(gTheiereSommets),gTheiereSommets, GL_STATIC_DRAW);
+   // faire le lien avec l attribut du nuanceur de sommets
+   glVertexAttribPointer( locVertex, 3, GL_FLOAT, GL_FALSE, 0, 0 );
+   glEnableVertexAttribArray(locVertex);   
 
    // créer le VBO la connectivité
-   // ...
+   glGenBuffers(1, &vboTheiereConnec);
+   // liaison de l objet tampon pour l utiliser
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboTheiereConnec);
+    // charger le tableau de connectivite sur le serveur
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(gTheiereConnec), gTheiereConnec, GL_STATIC_DRAW);
 
    glBindVertexArray(0);
 
@@ -279,10 +291,14 @@ void afficherTheiere()
    glBindVertexArray( vao[1] );
    // (partie 2) MODIFICATIONS ICI ...
    // vous pouvez utiliser temporairement cette fonction pour la première partie du TP, mais vous ferez mieux dans la seconde partie du TP
-   glBegin( GL_TRIANGLES );
+  /* glBegin( GL_TRIANGLES );
    for ( unsigned int i = 0 ; i < sizeof(gTheiereConnec)/sizeof(GLuint) ; i++ )
       glVertex3fv( &(gTheiereSommets[3*gTheiereConnec[i]] ) );
-   glEnd( );
+   glEnd( );*/
+   
+   //tracer la primitive 
+   glDrawElements(GL_TRIANGLES,sizeof(gTheiereSommets), GL_UNSIGNED_INT, 0 );
+
    glBindVertexArray(0);
 }
 
