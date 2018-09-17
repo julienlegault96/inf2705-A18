@@ -65,9 +65,16 @@ public:
          //                  0., 0., 1. );
          // matrVisu.Translate( 0., 0., -5. );
 
-         matrVisu.LoadIdentity( );
-         matrVisu.Translate( 0., 0., -dist );
+         matrVisu.LoadIdentity( );          
          // utilisez matrVisu.Translate(), matrVisu.Rotate(), ...
+         matrVisu.Translate( 0., 0., -dist );
+         //ajustement de la camera pour avoir une vue de cote
+         matrVisu.Rotate(-phi,1,0,0);
+         // rotation de la camera pour voir initialement la bestiole de face
+         matrVisu.Rotate(-90,0,0,1); 
+         // permet la rotation de la camera selon laxe des Y (bleu)
+         matrVisu.Rotate(-theta,0,0,1);      
+         matrVisu.Translate(0, 0, -5);
       }
    }
    void verifierAngles() // vérifier que les angles ne débordent pas les valeurs permises
