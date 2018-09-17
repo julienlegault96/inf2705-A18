@@ -4,7 +4,29 @@ Q1: Supposons que les coordonnées du modèle soient exprimées dans un système
     afin de préserver le même effet visuel d'une rotation positive ?  Quelle
     serait la nouvelle matrice pour une rotation autour de l'axe des Z ?
 
-
+Réponse:
+	Lorsqu'on compare la représentation des axes sur la main gauche à la place 
+	de la main droite, on réalise que deux doigts pointent encore dans la même
+	direction et la direction du dernier doigt est inversée. Par exemple, si
+	on pointe le majeur vers soi-même et le pouce vers le haut, l'index pointe
+	vers la gauche avec la main droite, mais vers la droite avec la main gauche.
+	Par conséquent, il suffit d'inverser (multiplier par -1) les coordonnées de 
+	l'axe qui est inversé. Par exemple, dans un système de main droite normal, 
+	une rotation d'un angle a autour de l'axe des Z serait représentée par la 
+	matrice suivante: 
+		| cos(a) -sin(a) 0   0 |
+		| sin(a) cos(a)  0   0 |
+		|   0      0     1   0 |
+		|   0      0     0   1 |
+		
+	alors que dans un système de coordonnées main gauche où l'axe des X est 
+	inversée, il faudrait plutôt utiliser la matrice suivante pour la même
+	rotation: 
+		| -cos(a) sin(a) 0   0 |
+		| sin(a) cos(a)  0   0 |
+		|   0      0     1   0 |
+		|   0      0     0   1 |
+	
 
 Q2: Dans ce TP, on peut déplacer la bestiole avec les flèches du clavier ou
     encore lancer un déplacement « automatique » avec la touche 'espace'.
@@ -17,4 +39,19 @@ Q2: Dans ce TP, on peut déplacer la bestiole avec les flèches du clavier ou
     sens de son mouvement. Comment faire en sorte que la tête (et le corps)
     soit toujours dirigée dans le sens de son mouvement ?
     Décrivez (avec assez de détails) comment vous implanteriez ceci dans ce TP.
+	
+Réponse:
+	Afin d'afficher la bestiole de sorte à ce qu'elle pointe dans sa direction
+	de déplacement, il faut d'abord connaître cette direction. Il est possible 
+	de le faire calculant la différence entre la position actuelle de la bestiole 
+	et celle de l'itération précédente. Ensuite, pour appliquer la rotation à la 
+	bestiole, la façon la plus simple est de le faire en deux étapes. La première 
+	est une rotation sur l'axe des Z afin d'aligner la bestiole avec la projection
+	du vecteur déplacement sur la plan XY. Le degré de la rotation est pareil à 
+	l'angle entre le vecteur initial projeté sur le plan XY et le vecteur déplacement
+	projeté sur le plan XY. La deuxième est d'ajuster l'inclinaison de la bestiole.
+	Il suffit de faire une rotation autour de l'axe perpendiculaire à l'axe auquel
+	la bestiole fait face et à l'axe des Z. Le degré de cette rotation est l'angle 
+	entre le vecteur direction de la bestiole courant (après la première rotation)
+	et celui voulu, soit le vecteur déplacement.
 
