@@ -52,10 +52,9 @@ struct Etat
    bool attEloignement;   // indique si on veut atténuer selone l'éloignement
    glm::vec4 bDim;        // les dimensions de l'aquarium: une boite [-x,+x][-y,+y][-z,+z]
    glm::ivec2 sourisPosPrec;
-   // partie 1: utiliser des plans de coupe:  Ax + By + Cz + D = 0  <=>  Ax + By + Cz = -D
-   glm::vec4 planRayonsX; // équation du plan de rayonX (partie 1)
-   glm::vec4 planDragage; // équation du plan de dragage (partie 1)
-   GLfloat angleDragage;  // angle (degrés) du plan de dragage autour de x (partie 1)
+   glm::vec4 planRayonsX; // équation du plan de rayonX
+   glm::vec4 planDragage; // équation du plan de dragage
+   GLfloat angleDragage;  // angle (degrés) du plan de dragage autour de x
 } etat = { false, true, true, false, glm::vec4( 16.0, 10.0, 8.0, 1.0 ), glm::ivec2(0), glm::vec4( 1, 0, 0, 4.0 ), glm::vec4( 0, 0, 1, 7.9 ), 0.0 };
 
 //
@@ -193,12 +192,12 @@ public:
       for ( unsigned int i = 0 ; i < sizeof(pos)/sizeof(pos[0]) ; ++i )
       {
          // donner position aléatoire en x
-         pos[i].x = glm::mix( -0.9*etat.bDim.x, 0.9*etat.bDim.x, rand()/((double)RAND_MAX) );
+         pos[i].x = glm::mix( -0.9 * etat.bDim.x, 0.9 * etat.bDim.x, rand() / ( (double)RAND_MAX) );
          // donner vitesse aléatoire en x
-         glm::vec3 vit = glm::vec3( glm::mix( -0.2, 0.2, rand()/((double)RAND_MAX) ), 0.0, 0.0 );
+         glm::vec3 vit = glm::vec3( glm::mix( -0.2, 0.2, rand() / ( (double)RAND_MAX) ), 0.0, 0.0 );
          vit.x += 0.1 * glm::sign(vit.x); // ajouter ou soustraire 0.1 selon le signe de vx afin d'avoir : 0.1 <= abs(vx) <= 0.3
          // donner taille aléatoire
-         float taille = glm::mix( 0.5 , 0.9, rand()/((double)RAND_MAX) );
+         float taille = glm::mix( 0.5 , 0.9, rand() / ( (double)RAND_MAX) );
 
          // créer un nouveau poisson
          Poisson *p = new Poisson( pos[i], vit, taille );
@@ -214,8 +213,20 @@ public:
    void afficherQuad( GLfloat alpha ) // le plan qui ferme les solides
    {
       glVertexAttrib4f( locColor, 1.0, 1.0, 1.0, alpha );
+      glEnable( GL_BLEND );
       // afficher le plan mis à l'échelle, tourné selon l'angle courant et à la position courante
-      // partie 1
+      matrModel.PushMatrix(); {
+         matrModel.Rotate( etat.angleDragage, 0.0, 1.0, 0.0 );
+         matrModel.Translate( 0.0, 0.0, -etat.planDragage[3] );
+         matrModel.Scale( etat.bDim[0], etat.bDim[1], etat.bDim[2] );
+         glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+
+         glBindVertexArray( vao );
+         glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
+         glBindVertexArray( 0 );
+      }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      glDisable( GL_BLEND );
+
 
    }
 
@@ -258,17 +269,19 @@ public:
    void afficherContenu()
    {
       glEnable( GL_CLIP_PLANE2 );
-
       glEnable( GL_CLIP_PLANE1 );
+
       glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
       afficherTousLesPoissons();
+
       glDisable( GL_CLIP_PLANE1 );
 
       glEnable( GL_CLIP_PLANE0 );
+
       glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
       afficherTousLesPoissons();
-      glDisable( GL_CLIP_PLANE0 );
 
+      glDisable( GL_CLIP_PLANE0 );
       glDisable( GL_CLIP_PLANE2 );
    }
 
@@ -405,25 +418,22 @@ void FenetreTP::initialiser()
                      -1, -1, 0 };
    const GLuint connec[] = { 0, 1, 2, 2, 3, 0 };
 
-   // *** l'initialisation des objets graphiques doit être faite seulement après l'initialisation de la fenêtre graphique
-   GLuint vao, vbo[2];
-   // partie 1: initialiser le VAO (pour le quad de l'aquarium)
+   // initialiser le VAO (pour le quad de l'aquarium)
    glGenVertexArrays( 1, &vao );
    glBindVertexArray( vao );
 
+   glGenBuffers( 2, vbo );
    // VBO Sommets
-   glGenBuffers( 1, &coo );
    glBindBuffer( GL_ARRAY_BUFFER, vbo[0] );
    glBufferData( GL_ARRAY_BUFFER, sizeof(coo), coo, GL_STATIC_DRAW );
-   glVertexAttribPointer(locVertex, 3, GL_FLOAT, GL_FALSE, 0, 0);
-   glEnableVertexAttribArray( locVertex )
+   glVertexAttribPointer( locVertex, 3, GL_FLOAT, GL_FALSE, 0, 0 );
+   glEnableVertexAttribArray( locVertex );
 
    // VBO Connectivité
-   glBindBuffer( GL_ARRAY_BUFFER, vbo[1] );
-   glBufferData( GL_ARRAY_BUFFER, sizeof(connec), connec, GL_STATIC_DRAW );
-   glVertexAttribPointer(locTexCoord, 3, GL_FLOAT, GL_FALSE, 0, 0);
+   glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, vbo[1] );
+   glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(connec), connec, GL_STATIC_DRAW );
 
-   // ...
+   glBindVertexArray( 0 );
 
    // créer quelques autres formes
    cubeFil = new FormeCube( 2.0, false );
@@ -469,8 +479,20 @@ void FenetreTP::afficherScene()
    glUniform4fv( locplanRayonsX, 1, glm::value_ptr(etat.planRayonsX) );
    glUniform1i( locattEloignement, etat.attEloignement );
 
+
    // afficher le contenu de l'aquarium
+   glEnable( GL_STENCIL_TEST );
+   glStencilFunc( GL_ALWAYS, 1, 1 ); 
+   glStencilOp( GL_INCR, GL_INCR, GL_INCR );
+
    aquarium.afficherContenu();
+
+   // Le stencil étant maintenant rempli de 1 (au premier bit) à la position des planètes, 
+   // on trace le plan blanc. 
+   glStencilFunc( GL_EQUAL, 1, 1 );
+   glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
+   aquarium.afficherQuad( 1.0 );
+   glDisable( GL_STENCIL_TEST );
 
    // en plus, dessiner le plan de dragage en transparence pour bien voir son étendue
    aquarium.afficherQuad( 0.25 );
@@ -480,6 +502,8 @@ void FenetreTP::afficherScene()
 
    // tracer les parois de l'aquarium
    aquarium.afficherParois( );
+
+   
 
    // sélectionner ?
    // partie 2: modifs ici ...
