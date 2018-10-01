@@ -101,6 +101,8 @@ public:
 
          // partie 2: modifs ici ...
          // donner la couleur de sélection
+         glm::vec3 coulYeux(1.0, 1.0, 0.0);
+         glm::vec3 coulCorps(0.0, 1.0, 0.0);
 
          // afficher le corps
          // (en utilisant le cylindre centré dans l'axe des Z, de rayon 1, entre (0,0,0) et (0,0,1))
@@ -356,8 +358,8 @@ void chargerNuanceurs()
          ProgNuanceur::afficherLogCompile( nuanceurObj );
          delete [] chainesSommets;
       }
-#if 0
-      // partie 2: enlever le "#if 0" pour utiliser le nuanceur de géométrie
+
+      // partie 2:
       const GLchar *chainesGeometrie = ProgNuanceur::lireNuanceur( "nuanceurGeometrie.glsl" );
       if ( chainesGeometrie != NULL )
       {
@@ -368,7 +370,7 @@ void chargerNuanceurs()
          ProgNuanceur::afficherLogCompile( nuanceurObj );
          delete [] chainesGeometrie;
       }
-#endif
+
       // attacher le nuanceur de fragments
       const GLchar *chainesFragments = ProgNuanceur::lireNuanceur( "nuanceurFragments.glsl" );
       if ( chainesFragments != NULL )
