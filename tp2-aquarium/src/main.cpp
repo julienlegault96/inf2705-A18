@@ -100,10 +100,7 @@ public:
          matrModel.Translate( position.x, position.y, position.z );
 
          // partie 2: modifs ici ...
-         // donner la couleur de sélection
-         glm::vec3 coulYeux(1.0, 1.0, 0.0);
-         glm::vec3 coulCorps(0.0, 1.0, 0.0);
-
+   
          // afficher le corps
          // (en utilisant le cylindre centré dans l'axe des Z, de rayon 1, entre (0,0,0) et (0,0,1))
          glm::vec3 coulCorps( 0.0, 1.0, 0.0 ); // vert
