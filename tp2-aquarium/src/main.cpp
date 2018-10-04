@@ -46,16 +46,17 @@ GLuint vbo[2] = {0,0};
 //
 struct Etat
 {
-   bool modeSelection;    // on est en mode sélection?
-   bool enmouvement;      // le modèle est en mouvement/rotation automatique ou non
-   bool afficheAxes;      // indique si on affiche les axes
-   bool attEloignement;   // indique si on veut atténuer selone l'éloignement
-   glm::vec4 bDim;        // les dimensions de l'aquarium: une boite [-x,+x][-y,+y][-z,+z]
+   bool modeSelection;        // on est en mode sélection?
+   bool etaitModeSelection;   // mode selection au frame precedent 
+   bool enmouvement;          // le modèle est en mouvement/rotation automatique ou non
+   bool afficheAxes;          // indique si on affiche les axes
+   bool attEloignement;       // indique si on veut atténuer selone l'éloignement
+   glm::vec4 bDim;            // les dimensions de l'aquarium: une boite [-x,+x][-y,+y][-z,+z]
    glm::ivec2 sourisPosPrec;
-   glm::vec4 planRayonsX; // équation du plan de rayonX
-   glm::vec4 planDragage; // équation du plan de dragage
-   GLfloat angleDragage;  // angle (degrés) du plan de dragage autour de x
-} etat = { false, true, true, false, glm::vec4( 16.0, 10.0, 8.0, 1.0 ), glm::ivec2(0), glm::vec4( 1, 0, 0, 4.0 ), glm::vec4( 0, 0, 1, 7.9 ), 0.0 };
+   glm::vec4 planRayonsX;     // équation du plan de rayonX
+   glm::vec4 planDragage;     // équation du plan de dragage
+   GLfloat angleDragage;      // angle (degrés) du plan de dragage autour de x
+} etat = { false, false, true, true, false, glm::vec4( 16.0, 10.0, 8.0, 1.0 ), glm::ivec2(0), glm::vec4( 1, 0, 0, 4.0 ), glm::vec4( 0, 0, 1, 7.9 ), 0.0 };
 
 //
 // variables pour définir le point de vue
@@ -90,7 +91,9 @@ class Poisson
 public:
    Poisson( glm::vec3 pos = glm::vec3(3.0,1.0,0.0), glm::vec3 vit = glm::vec3(1.0,0.0,0.0), float tai = 0.5 )
       : position(pos), vitesse(vit), taille(tai)
-   {}
+   {
+      estSelectionne = false;
+   }
 
    void afficher()
    {
@@ -98,12 +101,16 @@ public:
 
          // amener le repère à la position courante
          matrModel.Translate( position.x, position.y, position.z );
-
-         // partie 2: modifs ici ...
    
          // afficher le corps
          // (en utilisant le cylindre centré dans l'axe des Z, de rayon 1, entre (0,0,0) et (0,0,1))
-         glm::vec3 coulCorps( 0.0, 1.0, 0.0 ); // vert
+         glm::vec3 coulCorps;
+         
+         if (etat.modeSelection && !etat.etaitModeSelection) {
+            coulCorps = glm::vec3(couleurSel[0], couleurSel[1], couleurSel[2]);
+         } else {
+            coulCorps = glm::vec3( 0.0, 1.0, 0.0 ); // vert
+         }
          glVertexAttrib3fv( locColor, glm::value_ptr(coulCorps) );
          matrModel.PushMatrix();{
             matrModel.Scale( 5.0*taille, taille, taille );
@@ -144,6 +151,8 @@ public:
    glm::vec3 position;   // en unités
    glm::vec3 vitesse;    // en unités/seconde
    float taille;         // en unités
+   bool estSelectionne;
+   glm::vec3 couleurSel;
 };
 
 //
@@ -202,7 +211,11 @@ public:
          Poisson *p = new Poisson( pos[i], vit, taille );
 
          // assigner une couleur de sélection
-         // partie 2: modifs ici ...
+         GLfloat colorBreakpoints[3] = { 0.30, 0.60, 1.0 };
+
+         p->couleurSel[0] = colorBreakpoints[i % 3];
+         p->couleurSel[1] = colorBreakpoints[(i / 3) % 3];
+         p->couleurSel[2] = colorBreakpoints[(i / 9) % 3];
 
          // ajouter ce poisson dans la liste
          poissons.push_back( p );
@@ -211,6 +224,9 @@ public:
 
    void afficherQuad( GLfloat alpha ) // le plan qui ferme les solides
    {
+      if (etat.modeSelection && !etat.etaitModeSelection) {
+         return;
+      }
       glVertexAttrib4f( locColor, 1.0, 1.0, 1.0, alpha );
       glEnable( GL_BLEND );
       // afficher le plan mis à l'échelle, tourné selon l'angle courant et à la position courante
@@ -224,9 +240,8 @@ public:
          glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
          glBindVertexArray( 0 );
       }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      
       glDisable( GL_BLEND );
-
-
    }
 
    void afficherParois()
@@ -270,18 +285,43 @@ public:
       glEnable( GL_CLIP_PLANE2 );
       glEnable( GL_CLIP_PLANE1 );
 
+      // vue rayon X
       glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
       afficherTousLesPoissons();
 
       glDisable( GL_CLIP_PLANE1 );
-
       glEnable( GL_CLIP_PLANE0 );
 
+      // vue normale
       glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
       afficherTousLesPoissons();
-
       glDisable( GL_CLIP_PLANE0 );
+
+
+      glEnable( GL_STENCIL_TEST );
+
+      glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+      glDisable( GL_DEPTH_TEST );
+      glEnable( GL_CULL_FACE );
+      glStencilFunc( GL_ALWAYS, 0, 1 ); 
+
+      glStencilOp( GL_KEEP, GL_KEEP, GL_INCR );
+      glCullFace( GL_FRONT );
+      afficherTousLesPoissons();
+
+      glStencilOp( GL_KEEP, GL_KEEP, GL_DECR );
+      glCullFace( GL_BACK );
+      afficherTousLesPoissons();
+      
+      glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+      glEnable( GL_DEPTH_TEST );
+      glDisable( GL_CULL_FACE );
+      glStencilFunc( GL_NOTEQUAL, 0, ~0 );
+      
       glDisable( GL_CLIP_PLANE2 );
+
+      afficherQuad( 1.0 );
+      glDisable( GL_STENCIL_TEST );
    }
 
    void calculerPhysique( )
@@ -291,6 +331,9 @@ public:
          std::vector<Poisson*>::iterator it;
          for ( it = poissons.begin() ; it != poissons.end() ; it++ )
          {
+            if ( (*it)->estSelectionne ) {
+               continue;
+            }
             (*it)->avancerPhysique();
          }
       }
@@ -480,18 +523,7 @@ void FenetreTP::afficherScene()
 
 
    // afficher le contenu de l'aquarium
-   glEnable( GL_STENCIL_TEST );
-   glStencilFunc( GL_ALWAYS, 1, 1 ); 
-   glStencilOp( GL_INCR, GL_INCR, GL_INCR );
-
    aquarium.afficherContenu();
-
-   // Le stencil étant maintenant rempli de 1 (au premier bit) à la position des planètes, 
-   // on trace le plan blanc. 
-   glStencilFunc( GL_EQUAL, 1, 1 );
-   glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
-   aquarium.afficherQuad( 1.0 );
-   glDisable( GL_STENCIL_TEST );
 
    // en plus, dessiner le plan de dragage en transparence pour bien voir son étendue
    aquarium.afficherQuad( 0.25 );
@@ -502,10 +534,35 @@ void FenetreTP::afficherScene()
    // tracer les parois de l'aquarium
    aquarium.afficherParois( );
 
-   
+   if ( etat.modeSelection ) {
+      if ( !etat.etaitModeSelection ) {
+         etat.etaitModeSelection = true;
 
-   // sélectionner ?
-   // partie 2: modifs ici ...
+         glFinish();
+         GLint viewport[4]; glGetIntegerv( GL_VIEWPORT, viewport );
+         GLint posX = etat.sourisPosPrec[0], posY = viewport[3] - etat.sourisPosPrec[1];
+         glReadBuffer( GL_BACK );
+
+         GLfloat couleur[3];
+         glReadPixels( posX, posY, 1, 1, GL_RGB, GL_FLOAT, couleur );
+
+         for (auto it = aquarium.poissons.begin(); it != aquarium.poissons.end(); it++) {
+            bool found = true;
+            float errorMargin = 0.005;
+            for (int i = 0; i < 3; i++) {
+               if ( (*it)->couleurSel[i] > couleur[i] + errorMargin ||
+                    (*it)->couleurSel[i] < couleur[i] - errorMargin ) {
+                  found = false;
+                  break;
+               }
+            }
+            if (found) {
+               (*it)->estSelectionne = !(*it)->estSelectionne;
+               break;
+            }
+         }
+      }
+   }
 
 }
 
@@ -597,6 +654,7 @@ void FenetreTP::sourisClic( int button, int state, int x, int y )
       default:
       case TP_BOUTON_GAUCHE: // Modifier le point de vue
          etat.modeSelection = false;
+         etat.etaitModeSelection = false;
          break;
       case TP_BOUTON_DROIT: // Sélectionner des objets
          etat.modeSelection = true;
@@ -608,6 +666,7 @@ void FenetreTP::sourisClic( int button, int state, int x, int y )
    else
    {
       etat.modeSelection = false;
+      etat.etaitModeSelection = false;
    }
 }
 
