@@ -1,5 +1,6 @@
 #version 410
 
+uniform int modeSelection;
 uniform int attEloignement;
 const float debAttenuation = 30.0;
 const float finAttenuation = 50.0;
@@ -16,18 +17,14 @@ void main( void )
    FragColor = AttribsIn.couleur;
 
    // atténuer selon la profondeur
-   if ( attEloignement == 1 )
+   if ( attEloignement == 1 && modeSelection == 0)
    {
-      // Mettre un énoncé bidon afin que l'optimisation du compilateur n'élimine l'attribut "attEloignement".
-      // Vous ENLEVEREZ ce test inutile!
-      if ( FragColor.x < -10000.0 ) discard;
-      
       // Obtenir la distance à la caméra du sommet dans le repère de la caméra
-      //float dist = ...;
+      float dist = gl_FragCoord.z / gl_FragCoord.w;
       // Obtenir un facteur d'interpolation entre 0 et 1
-      //float factDist = smoothstep( ... );
+      float factDist = smoothstep (  50 ,  30 ,  dist );
       // Modifier la couleur du fragment en utilisant ce facteur
-      // ...
+      FragColor = factDist*FragColor;      
 
       // pour déboguer et « voir » le facteur ou la distance, on peut utiliser:
       //FragColor = vec4( vec3(factDist), 1.0 );
