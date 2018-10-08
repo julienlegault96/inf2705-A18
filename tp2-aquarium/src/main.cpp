@@ -397,9 +397,7 @@ void chargerNuanceurs()
          ProgNuanceur::afficherLogCompile( nuanceurObj );
          delete [] chainesSommets;
       }
-
-    /*
-     // partie 2: enlever le "#if 0" pour utiliser le nuanceur de géométrie
+    
       const GLchar *chainesGeometrie = ProgNuanceur::lireNuanceur( "nuanceurGeometrie.glsl" );
       if ( chainesGeometrie != NULL )
       {
@@ -410,7 +408,7 @@ void chargerNuanceurs()
          ProgNuanceur::afficherLogCompile( nuanceurObj );
          delete [] chainesGeometrie;
       }
-      */
+      
       
     
 
@@ -572,7 +570,7 @@ void FenetreTP::afficherScene()
 void FenetreTP::redimensionner( GLsizei w, GLsizei h )
 {  
     GLfloat h2 = 0.5*h;
-    glScissor( 0, 0, w, h );
+   
     glViewport( 0, h2, w, h2 ); // pour le viewport 0
     glViewportIndexedf( 1,  0, 0, w, h2 ); // pour le viewport 1
     glScissorIndexed(   1,  0, 0, w, h2 );

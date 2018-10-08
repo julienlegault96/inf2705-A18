@@ -16,6 +16,9 @@ layout(location=3) in vec4 Color;
 
 out Attribs {
    vec4 couleur;  
+   float clipDistance0;
+   float clipDistance1;
+   float clipDistance2;  
 } AttribsOut;
 
 void main( void )
@@ -37,6 +40,9 @@ void main( void )
     }
 
    gl_ClipDistance[0] = dot( planRayonsX, matrModel * Vertex );
+    AttribsOut.clipDistance0 = gl_ClipDistance[0];
    gl_ClipDistance[1] = dot( planRayonsX * -1.0f, matrModel * Vertex );
+   AttribsOut.clipDistance1 = gl_ClipDistance[1];
    gl_ClipDistance[2] = dot( planDragage, matrModel * Vertex );
+   AttribsOut.clipDistance2 = gl_ClipDistance[2];
  }
