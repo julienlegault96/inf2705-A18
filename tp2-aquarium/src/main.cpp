@@ -544,7 +544,7 @@ void FenetreTP::afficherScene()
 
          glFinish();
          GLint viewport[4]; glGetIntegerv( GL_VIEWPORT, viewport );
-         GLint posX = etat.sourisPosPrec[0], posY = viewport[3] - etat.sourisPosPrec[1];
+         GLint posX = etat.sourisPosPrec[0], posY = viewport[1] + viewport[3] - etat.sourisPosPrec[1];
          glReadBuffer( GL_BACK );
 
          GLfloat couleur[3];
@@ -571,13 +571,14 @@ void FenetreTP::afficherScene()
 }
 
 void FenetreTP::redimensionner( GLsizei w, GLsizei h )
-{
-  GLfloat h2 = 0.5*h;
- // glScissor( 0, 0, w, h );
+{  
+    GLfloat h2 = 0.5*h;
+    glScissor( 0, 0, w, h );
     glViewport( 0, h2, w, h2 ); // pour le viewport 0
     glViewportIndexedf( 1,  0, 0, w, h2 ); // pour le viewport 1
     glScissorIndexed(   1,  0, 0, w, h2 );
     glEnable( GL_SCISSOR_TEST );
+    
 }
 
 void FenetreTP::clavier( TP_touche touche )
