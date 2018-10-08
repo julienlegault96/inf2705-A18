@@ -19,12 +19,12 @@ void main(void)
   for ( int i = 0; i < gl_in.length() ; ++i)
   {
     gl_ViewportIndex = 0; // premiere cloture
-    gl_Position = -gl_in[i].gl_Position;
+    gl_Position = gl_in[i].gl_Position;
     AttribsOut.couleur = AttribsIn[i].couleur;
 
     gl_ClipDistance[0] = AttribsIn[i].clipDistance0;
     gl_ClipDistance[1] = AttribsIn[i].clipDistance1;
-    gl_ClipDistance[2] = -AttribsIn[i].clipDistance2;  
+    gl_ClipDistance[2] = AttribsIn[i].clipDistance2;  
 
     EmitVertex();  
   }
@@ -38,7 +38,7 @@ void main(void)
 
     gl_ClipDistance[0] = AttribsIn[i].clipDistance0;
     gl_ClipDistance[1] = AttribsIn[i].clipDistance1;
-    gl_ClipDistance[2] = AttribsIn[i].clipDistance2; 
+    gl_ClipDistance[2] = -AttribsIn[i].clipDistance2; 
 
     EmitVertex(); 
 
