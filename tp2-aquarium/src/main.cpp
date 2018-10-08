@@ -1,7 +1,6 @@
 // Prénoms, noms et matricule des membres de l'équipe:
-// - Prénom1 NOM1 (matricule1)
-// - Prénom2 NOM2 (matricule2)
-#warning "Écrire les prénoms, noms et matricule des membres de l'équipe dans le fichier et commenter cette ligne"
+// - Julien Legault (1847125)
+// - Samuel Meilleur (1846337)
 
 #include <stdlib.h>
 #include <iostream>
