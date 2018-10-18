@@ -70,8 +70,24 @@ float calculerSpot( in vec3 D, in vec3 L )
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 {
-   vec4 grisUniforme = vec4(0.7,0.7,0.7,1.0);
-   return( grisUniforme );
+   /*vec4 grisUniforme = vec4(0.7,0.7,0.7,1.0);
+   return( grisUniforme );*/
+   // Gouraud
+   vec4 reflexion = vec4(0.0, 0.0, 0.0, 0.0);
+   if (utiliseBlinn) {
+        vec3 B = normalize(L+O);
+        reflexion += FrontMaterial.ambient * LightSource.ambient + 
+                         FrontMaterial.diffuse * LightSource.diffuse*dot(L,N) +
+                         FrontMaterial.specular* LightSource.specular*pow(dot(B,N),FrontMaterial.shininess);
+   }
+   // Phong
+   else {
+       vec3 R = 2*(L*N)*N -L;
+       reflexion += FrontMaterial.ambient * LightSource.ambient + 
+                         FrontMaterial.diffuse * LightSource.diffuse*dot(L,N) +
+                         FrontMaterial.specular* LightSource.specular*pow(dot(R,O),FrontMaterial.shininess);
+   }
+   return (reflexion);
 }
 
 void main( void )
@@ -80,6 +96,6 @@ void main( void )
    gl_Position = matrProj * matrVisu * matrModel * Vertex;
 
    // couleur du sommet
-   //AttribsOut.couleur = calculerReflexion( L, N, O );
+   //AttribsOut.couleur =
    AttribsOut.couleur = Color; // à modifier!
 }
