@@ -28,7 +28,7 @@ layout (std140) uniform MaterialParameters
 // Définition des paramètres globaux du modèle de lumière
 layout (std140) uniform LightModelParameters
 {
-   vec4 ambient;       // couleur ambiante
+   vec4 ambient;       // couleureur ambiante
    bool localViewer;   // observateur local ou à l'infini?
    bool twoSide;       // éclairage sur les deux côtés ou un seul?
 } LightModel;
@@ -39,10 +39,10 @@ layout (std140) uniform varsUnif
    int typeIllumination;     // 0:Gouraud, 1:Phong
    bool utiliseBlinn;        // indique si on veut utiliser modèle spéculaire de Blinn ou Phong
    bool utiliseDirect;       // indique si on utilise un spot style Direct3D ou OpenGL
-   bool afficheNormales;     // indique si on utilise les normales comme couleurs (utile pour le débogage)
+   bool afficheNormales;     // indique si on utilise les normales comme couleureurs (utile pour le débogage)
    // partie 3: texture
    int texnumero;            // numéro de la texture appliquée
-   bool utiliseCouleur;      // doit-on utiliser la couleur de base de l'objet en plus de celle de la texture?
+   bool utilisecouleureur;      // doit-on utiliser la couleureur de base de l'objet en plus de celle de la texture?
    int afficheTexelFonce;    // un texel noir doit-il être affiché 0:noir, 1:mi-coloré, 2:transparent?
 };
 
@@ -60,6 +60,8 @@ layout(location=8) in vec4 TexCoord;
 
 out Attribs {
    vec4 couleur;
+   vec3 normal;
+   vec3 pos;   
 } AttribsOut;
 
 float calculerSpot( in vec3 D, in vec3 L )
@@ -73,21 +75,26 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
    /*vec4 grisUniforme = vec4(0.7,0.7,0.7,1.0);
    return( grisUniforme );*/
    // Gouraud
-   vec4 reflexion = vec4(0.0, 0.0, 0.0, 0.0);
-   if (utiliseBlinn) {
-        vec3 B = normalize(L+O);
-        reflexion += FrontMaterial.ambient * LightSource.ambient + 
-                         FrontMaterial.diffuse * LightSource.diffuse*dot(L,N) +
-                         FrontMaterial.specular* LightSource.specular*pow(dot(B,N),FrontMaterial.shininess);
+   vec4 coul = vec4(0.0, 0.0, 0.0, 0.0);
+
+   // diffuse
+   float NdotL = max (0.0, dot(N,L));
+   coul += FrontMaterial.diffuse* LightSource.diffuse*NdotL;
+
+    // speculaire
+   if (utiliseBlinn) {    
+    float NdotHV = max(0.0, dot(normalize(L+O),N));
+    coul += FrontMaterial.specular*LightSource.specular*pow(max(NdotHV, 0.0),FrontMaterial.shininess);
+    
    }
-   // Phong
    else {
-       vec3 R = 2*(L*N)*N -L;
-       reflexion += FrontMaterial.ambient * LightSource.ambient + 
-                         FrontMaterial.diffuse * LightSource.diffuse*dot(L,N) +
-                         FrontMaterial.specular* LightSource.specular*pow(dot(R,O),FrontMaterial.shininess);
+    float NdotHV = max(0.0, dot(reflect(-L,N),O));
+    coul += FrontMaterial.specular*LightSource.specular*pow(max(NdotHV, 0.0),FrontMaterial.shininess);
    }
-   return (reflexion);
+    // ambient
+   coul += FrontMaterial.ambient * LightSource.ambient;
+
+   return coul;
 }
 
 void main( void )
@@ -95,7 +102,23 @@ void main( void )
    // transformation standard du sommet
    gl_Position = matrProj * matrVisu * matrModel * Vertex;
 
-   // couleur du sommet
-   //AttribsOut.couleur =
-   AttribsOut.couleur = Color; // à modifier!
+   vec3 pos = vec3(matrVisu * matrModel * Vertex);
+   vec3 O = normalize(-pos);
+   vec3 N = normalize(matrNormale * Normal);
+
+  if(typeIllumination == 0)
+   {
+     AttribsOut.couleur = vec4(0., 0., 0., 1.);
+    for (int i=0; i<2;  i++) {
+     vec3 L = normalize(vec3(matrVisu*LightSource.position[i]) - pos);
+     AttribsOut.couleur += calculerReflexion(L, N, O); 
+    }
+
+    AttribsOut.couleur += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
+    AttribsOut.couleur = clamp(AttribsOut.couleur,0.,1.);
+  }
+  else {
+        AttribsOut.normal = N;
+        AttribsOut.pos = pos;
+       }
 }
