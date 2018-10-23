@@ -72,23 +72,20 @@ float calculerSpot( in vec3 D, in vec3 L )
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 {
-   /*vec4 grisUniforme = vec4(0.7,0.7,0.7,1.0);
-   return( grisUniforme );*/
    // Gouraud
    vec4 coul = vec4(0.0, 0.0, 0.0, 0.0);
 
    // diffuse
-   float NdotL = max (0.0, dot(N,L));
-   coul += FrontMaterial.diffuse* LightSource.diffuse*NdotL;
+   float NdotL = max ( 0.0, dot( N, L ) );
+   coul += FrontMaterial.diffuse * LightSource.diffuse*NdotL;
 
-    // speculaire
+   // speculaire
    if (utiliseBlinn) {    
-    float NdotHV = max(0.0, dot(normalize(L+O),N));
-    coul += FrontMaterial.specular*LightSource.specular*pow(max(NdotHV, 0.0),FrontMaterial.shininess);
-    
+    float NdotHV = max( 0.0, dot( normalize( L + O ), N ) );
+    coul += FrontMaterial.specular*LightSource.specular*pow(max(NdotHV, 0.0),FrontMaterial.shininess);    
    }
    else {
-    float NdotHV = max(0.0, dot(reflect(-L,N),O));
+    float NdotHV = max( 0.0, dot( reflect( -L, N ), O ) );
     coul += FrontMaterial.specular*LightSource.specular*pow(max(NdotHV, 0.0),FrontMaterial.shininess);
    }
     // ambient
@@ -102,7 +99,7 @@ void main( void )
    // transformation standard du sommet
    gl_Position = matrProj * matrVisu * matrModel * Vertex;
 
-   vec3 pos = vec3(matrVisu * matrModel * Vertex);
+   vec3 pos = vec3( matrVisu * matrModel * Vertex ).xyz;
    vec3 O = normalize(-pos);
    vec3 N = normalize(matrNormale * Normal);
 
@@ -110,12 +107,12 @@ void main( void )
    {
      AttribsOut.couleur = vec4(0., 0., 0., 1.);
     for (int i=0; i<2;  i++) {
-     vec3 L = normalize(vec3(matrVisu*LightSource.position[i]) - pos);
+     vec3 L = normalize(vec3(matrVisu*LightSource.position[i]/LightSource.position[i].w).xyz - pos);
      AttribsOut.couleur += calculerReflexion(L, N, O); 
     }
 
     AttribsOut.couleur += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
-    AttribsOut.couleur = clamp(AttribsOut.couleur,0.,1.);
+    AttribsOut.couleur = clamp(AttribsOut.couleur,0.0,1.0);
   }
   else {
         AttribsOut.normal = N;
