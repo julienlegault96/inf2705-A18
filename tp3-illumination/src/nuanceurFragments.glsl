@@ -36,14 +36,14 @@ layout (std140) uniform LightModelParameters
 layout (std140) uniform varsUnif
 {
    // partie 1: illumination
-   int typeIllumination;     // 0:Gouraud, 1:Phong
+   int  typeIllumination;     // 0:Gouraud, 1:Phong
    bool utiliseBlinn;        // indique si on veut utiliser modèle spéculaire de Blinn ou Phong
    bool utiliseDirect;       // indique si on utilise un spot style Direct3D ou OpenGL
    bool afficheNormales;     // indique si on utilise les normales comme couleureurs (utile pour le débogage)
    // partie 3: texture
-   int texnumero;            // numéro de la texture appliquée
+   int  texnumero;            // numéro de la texture appliquée
    bool utilisecouleureur;      // doit-on utiliser la couleureur de base de l'objet en plus de celle de la texture?
-   int afficheTexelFonce;    // un texel noir doit-il être affiché 0:noir, 1:mi-coloré, 2:transparent?
+   int  afficheTexelFonce;    // un texel noir doit-il être affiché 0:noir, 1:mi-coloré, 2:transparent?
 };
 
 uniform sampler2D laTexture;
@@ -63,7 +63,7 @@ out vec4 FragColor;
 float calculerSpot( in vec3 D, in vec3 L )
 {
    float spotFacteur = 1.0;
-   return( spotFacteur );
+   return spotFacteur;
 }
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
@@ -72,22 +72,18 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
    vec4 coul = vec4(0.0, 0.0, 0.0, 1.0);
 
    // diffuse
-   float NdotL = max ( 0.0, dot( N, L ) );
+   float NdotL = max(0.0, dot( N, L ));
    coul += FrontMaterial.diffuse * LightSource.diffuse*NdotL;
 
    // speculaire
-   if (utiliseBlinn)
-   {    
-    float NdotHV = max( 0.0, dot( normalize( L + O ), N ) );
-    coul += FrontMaterial.specular*LightSource.specular*pow(max(NdotHV, 0.0),FrontMaterial.shininess);    
+   if (utiliseBlinn) {    
+      float NdotHV = max(0.0, dot( normalize( L + O ), N ));
+      coul += FrontMaterial.specular * LightSource.specular * pow(max(NdotHV, 0.0), FrontMaterial.shininess);    
+   } else {
+      float NdotHV = max(0.0, dot( reflect( -L, N ), O ));
+      coul += FrontMaterial.specular * LightSource.specular * pow(max(NdotHV, 0.0), FrontMaterial.shininess);
    }
-
-   else
-   {
-    float NdotHV = max( 0.0, dot( reflect( -L, N ), O ) );
-    coul += FrontMaterial.specular*LightSource.specular*pow(max(NdotHV, 0.0),FrontMaterial.shininess);
-   }
-    // ambient
+   // ambient
    coul += FrontMaterial.ambient * LightSource.ambient;
 
    return coul;
@@ -95,25 +91,25 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 
 void main( void )
 {
-  if(typeIllumination == 0)
-  {
-    FragColor = AttribsIn.couleur;
-  }
+   if (afficheNormales) {
+      FragColor = vec4(AttribsIn.normal, 1.f);
+      return;
+   }
 
-  else
-  {    
-   vec3 O = normalize(-AttribsIn.pos);
-   vec3 N = AttribsIn.normal;
+   if (typeIllumination == 0) {
+      FragColor = AttribsIn.couleur;
+   } else {    
+      vec3 O = normalize(-AttribsIn.pos);
+      vec3 N = AttribsIn.normal;
 
-   FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-  
-    for (int i=0; i<2;  i++)
-    {
-     vec3 L = normalize(vec3(matrVisu*LightSource.position[i]/LightSource.position[i].w).xyz - AttribsIn.pos);
-     FragColor += calculerReflexion(L, N, O); 
-    }
+      FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
 
-   FragColor += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
-   FragColor = clamp( FragColor, 0.0, 1.0 );
-  }
+      for (int i = 0; i < 2; i++) {
+         vec3 L = normalize( vec3(matrVisu * LightSource.position[i]).xyz - AttribsIn.pos);
+         FragColor += calculerReflexion(L, N, O); 
+      }
+
+      FragColor += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
+      FragColor = clamp( FragColor, 0.0, 1.0 );
+   }
 }

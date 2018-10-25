@@ -29,7 +29,7 @@ GLuint indLightSource;
 GLuint indFrontMaterial;
 GLuint indLightModel;
 GLuint indvarsUnif;
-GLuint progBase;  // le programme de nuanceurs de base
+GLuint progBase;   // le programme de nuanceurs de base
 GLint locVertexBase = -1;
 GLint locColorBase = -1;
 GLint locmatrModelBase = -1;
@@ -84,8 +84,9 @@ public:
 // définition des lumières
 glm::vec4 posLumiInit[2] = { glm::vec4( -6.5, -2.0, 14.0, 1.0 ),
                              glm::vec4( 5.5, 5.5, 14.0, 1.0 ) };
-glm::vec4 spotDirInit[2] = { 4.0f*glm::normalize( glm::vec4( 5.0, -2.0, -10.0, 1.0 ) ),
-                             4.0f*glm::normalize( glm::vec4( -5.0, -2.0, -10.0, 1.0 ) ) };
+glm::vec4 spotDirInit[2] = { 4.0f * glm::normalize( glm::vec4( 5.0, -2.0, -10.0, 1.0 ) ),
+                             4.0f * glm::normalize( glm::vec4( -5.0, -2.0, -10.0, 1.0 ) ) };
+
 struct LightSourceParameters
 {
    glm::vec4 ambient;
@@ -105,7 +106,7 @@ struct LightSourceParameters
                   { spotDirInit[0], spotDirInit[1] },
                   1.0,       // l'exposant du cône
                   25.0,      // l'angle du cône du spot
-                  1., 0., 0. };
+                  1.f, 0.f, 0.f };
 
 // définition du matériau
 struct MaterialParameters
@@ -318,14 +319,14 @@ void chargerNuanceurs()
       // partie 4:
       if ( Etat::utiliseTess )
       {
-         if ( ( locfacteurDeform = glGetUniformLocation( prog, "facteurDeform" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de facteurDeform" << std::endl;
-         if ( ( locTessLevelInner = glGetUniformLocation( prog, "TessLevelInner" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de TessLevelInner (partie 4)" << std::endl;
-         if ( ( locTessLevelOuter = glGetUniformLocation( prog, "TessLevelOuter" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de TessLevelOuter (partie 4)" << std::endl;
+         if ( (locfacteurDeform  = glGetUniformLocation(prog, "facteurDeform")) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de facteurDeform" << std::endl;
+         if ( (locTessLevelInner = glGetUniformLocation(prog, "TessLevelInner")) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de TessLevelInner (partie 4)" << std::endl;
+         if ( (locTessLevelOuter = glGetUniformLocation(prog, "TessLevelOuter")) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de TessLevelOuter (partie 4)" << std::endl;
       }
-      if ( ( indLightSource = glGetUniformBlockIndex( prog, "LightSourceParameters" ) ) == GL_INVALID_INDEX ) std::cerr << "!!! pas trouvé l'\"index\" de LightSource" << std::endl;
-      if ( ( indFrontMaterial = glGetUniformBlockIndex( prog, "MaterialParameters" ) ) == GL_INVALID_INDEX ) std::cerr << "!!! pas trouvé l'\"index\" de FrontMaterial" << std::endl;
-      if ( ( indLightModel = glGetUniformBlockIndex( prog, "LightModelParameters" ) ) == GL_INVALID_INDEX ) std::cerr << "!!! pas trouvé l'\"index\" de LightModel" << std::endl;
-      if ( ( indvarsUnif = glGetUniformBlockIndex( prog, "varsUnif" ) ) == GL_INVALID_INDEX ) std::cerr << "!!! pas trouvé l'\"index\" de varsUnif" << std::endl;
+      if ( (indLightSource   = glGetUniformBlockIndex(prog, "LightSourceParameters")) == GL_INVALID_INDEX ) std::cerr << "!!! pas trouvé l'\"index\" de LightSource" << std::endl;
+      if ( (indFrontMaterial = glGetUniformBlockIndex(prog, "MaterialParameters")) == GL_INVALID_INDEX ) std::cerr << "!!! pas trouvé l'\"index\" de FrontMaterial" << std::endl;
+      if ( (indLightModel    = glGetUniformBlockIndex(prog, "LightModelParameters")) == GL_INVALID_INDEX ) std::cerr << "!!! pas trouvé l'\"index\" de LightModel" << std::endl;
+      if ( (indvarsUnif      = glGetUniformBlockIndex(prog, "varsUnif")) == GL_INVALID_INDEX ) std::cerr << "!!! pas trouvé l'\"index\" de varsUnif" << std::endl;
 
       // charger les ubo
       {
@@ -505,6 +506,9 @@ void afficherModele()
 
       glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
       // (partie 1: ne pas oublier de calculer et donner une matrice pour les transformations des normales)
+      glm::mat3 matrVM = glm::mat3( matrVisu.getMatr() * matrModel.getMatr() );
+      glm::mat3 matrNormale = glm::inverse( matrVM );
+      glUniformMatrix3fv( locmatrNormale, 1, GL_TRUE, glm::value_ptr( matrNormale ) );
 
       glPatchParameteri( GL_PATCH_VERTICES, 4 );
       switch ( Etat::modele )
@@ -567,8 +571,8 @@ void afficherLumiere()
       // dessiner une ligne vers la source lumineuse
       GLfloat coords[] =
       {
-         LightSource.position[i].x                               , LightSource.position[i].y                               , LightSource.position[i].z,
-         LightSource.position[i].x+LightSource.spotDirection[i].x, LightSource.position[i].y+LightSource.spotDirection[i].y, LightSource.position[i].z+LightSource.spotDirection[i].z
+         LightSource.position[i].x, LightSource.position[i].y, LightSource.position[i].z,
+         LightSource.position[i].x + LightSource.spotDirection[i].x, LightSource.position[i].y + LightSource.spotDirection[i].y, LightSource.position[i].z + LightSource.spotDirection[i].z
       };
       glLineWidth( 3.0 );
       glVertexAttrib3f( locColorBase, 1.0, 1.0, 0.5 ); // jaune
