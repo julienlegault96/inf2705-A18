@@ -67,37 +67,18 @@ out Attribs {
 
 float calculerSpot( in vec3 D, in vec3 L )
 {
-   float spotFacteur;
-   float cosGamma = max(0.0, dot(L, D));
-   float cosDelta = cos(radians(LightSource.spotAngleOuverture));
-
-   if (cosGamma > cosDelta) {
-      return 0.0;
-   }
-
-   if (utiliseDirect) {
-      spotFacteur = pow( max(0.0, cosGamma), LightSource.spotExponent );
-   } else {
-      float cosOuter = pow(cosDelta, 1.01 + LightSource.spotExponent / 2);
-      spotFacteur = smoothstep(cosOuter, cosDelta, cosGamma);
-   }
-
-   return spotFacteur ;
+   float spotFacteur = 1.0;
+   return spotFacteur;
 }
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 {
-   vec3 spotDirection = normalize(transpose(inverse(mat3(matrVisu))) * -LightSource.spotDirection[1]);
-   float spotFacteur = calculerSpot(spotDirection, L);
-
-   return vec4(spotFacteur, spotFacteur, spotFacteur, 1.0);
-
    // Gouraud
    vec4 coul = vec4(0.0, 0.0, 0.0, 1.0);
 
    // diffuse
    float NdotL = max(0.0, dot(N, L));
-   coul += spotFacteur * FrontMaterial.diffuse * LightSource.diffuse * NdotL;
+   coul +=  FrontMaterial.diffuse * LightSource.diffuse * NdotL;
 
    // speculaire
    if (utiliseBlinn) {    
@@ -123,15 +104,14 @@ void main( void )
    vec3 N = normalize(matrNormale * Normal);
 
    if (typeIllumination == 0){
-      // AttribsOut.couleur = vec4(0.f, 0.f, 0.f, 1.f);
-      vec3 L = vec3(1.0);
+      AttribsOut.couleur = vec4(0.f, 0.f, 0.f, 1.f);
       for (int i = 0; i < 2;  i++) {
-          L = normalize( vec3(matrVisu * LightSource.position[i]).xyz - pos );
-      //    AttribsOut.couleur += calculerReflexion(L, N, O); 
+          vec3 L = normalize( vec3(matrVisu * LightSource.position[i]).xyz - pos );
+          AttribsOut.couleur += calculerReflexion(L, N, O); 
       }
-      // AttribsOut.couleur += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
-      // AttribsOut.couleur = clamp(AttribsOut.couleur, 0.0, 1.0);
-      AttribsOut.couleur = calculerReflexion(L, N, O);
+       AttribsOut.couleur += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
+       AttribsOut.couleur = clamp(AttribsOut.couleur, 0.0, 1.0);
+      
    }
    AttribsOut.normal = N;
    AttribsOut.pos = pos;

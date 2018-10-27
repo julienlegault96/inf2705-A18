@@ -62,8 +62,18 @@ out vec4 FragColor;
 
 float calculerSpot( in vec3 D, in vec3 L )
 {
-   float spotFacteur = 1.0;
-   return spotFacteur;
+   float spotFacteur;
+   float cosGamma = max(0.0, dot(L, D));
+   float cosDelta = cos(radians(LightSource.spotAngleOuverture));
+
+
+   if (!utiliseDirect) { // OpenGL
+    (cosGamma > cosDelta) ? spotFacteur = pow( max(0.0, cosGamma), LightSource.spotExponent ) : spotFacteur = 0 ;
+   } else { // Direct3D
+      float cosOuter = pow(cosDelta, 1.01 + LightSource.spotExponent / 2);
+      spotFacteur = smoothstep(cosOuter, cosDelta, cosGamma);
+   }
+   return spotFacteur ;
 }
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
@@ -106,7 +116,8 @@ void main( void )
 
       for (int i = 0; i < 2; i++) {
          vec3 L = normalize( vec3(matrVisu * LightSource.position[i]).xyz - AttribsIn.pos);
-         FragColor += calculerReflexion(L, N, O); 
+         vec3 D = normalize(transpose(inverse(mat3(matrVisu)))*(-LightSource.spotDirection[i]));
+         FragColor += calculerReflexion(L, N, O)*calculerSpot(D, L); 
       }
 
       FragColor += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
