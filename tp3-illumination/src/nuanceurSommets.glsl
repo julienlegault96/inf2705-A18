@@ -42,7 +42,7 @@ layout (std140) uniform varsUnif
    bool afficheNormales;     // indique si on utilise les normales comme couleurs (utile pour le débogage)
    // partie 3: texture
    int  texnumero;            // numéro de la texture appliquée
-   bool utilisecouleureur;      // doit-on utiliser la couleureur de base de l'objet en plus de celle de la texture?
+   bool utilisecouleur;      // doit-on utiliser la couleur de base de l'objet en plus de celle de la texture?
    int  afficheTexelFonce;    // un texel noir doit-il être affiché 0:noir, 1:mi-coloré, 2:transparent?
 };
 
@@ -62,7 +62,7 @@ out Attribs {
    vec4 couleur;
    vec3 normal;
    vec3 pos;
-   
+   vec2 texCoord;
 } AttribsOut;
 
 float calculerSpot( in vec3 D, in vec3 L )
@@ -98,7 +98,7 @@ void main( void )
 {
    // transformation standard du sommet
    gl_Position = matrProj * matrVisu * matrModel * Vertex;
-
+   AttribsOut.texCoord = TexCoord.st;
    vec3 pos = vec3(matrVisu * matrModel * Vertex);
    vec3 O = normalize(-pos);
    vec3 N = normalize(matrNormale * Normal);

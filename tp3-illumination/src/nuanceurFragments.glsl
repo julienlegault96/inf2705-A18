@@ -42,7 +42,7 @@ layout (std140) uniform varsUnif
    bool afficheNormales;     // indique si on utilise les normales comme couleureurs (utile pour le débogage)
    // partie 3: texture
    int  texnumero;            // numéro de la texture appliquée
-   bool utilisecouleureur;      // doit-on utiliser la couleureur de base de l'objet en plus de celle de la texture?
+   bool utilisecouleur;      // doit-on utiliser la couleureur de base de l'objet en plus de celle de la texture?
    int  afficheTexelFonce;    // un texel noir doit-il être affiché 0:noir, 1:mi-coloré, 2:transparent?
 };
 
@@ -56,19 +56,20 @@ in Attribs {
    vec4 couleur;
    vec3 normal;
    vec3 pos;   
+   vec2 texCoord;
 } AttribsIn;
 
 out vec4 FragColor;
 
 float calculerSpot( in vec3 D, in vec3 L )
 {
-   float spotFacteur;
+   float spotFacteur =1.0;
    float cosGamma = max(0.0, dot(L, D));
    float cosDelta = cos(radians(LightSource.spotAngleOuverture));
 
 
    if (!utiliseDirect) { // OpenGL
-    (cosGamma > cosDelta) ? spotFacteur = pow( max(0.0, cosGamma), LightSource.spotExponent ) : spotFacteur = 0 ;
+    (cosGamma > cosDelta) ? (spotFacteur = pow( max(0.0, cosGamma), LightSource.spotExponent )) :  (spotFacteur = 0.0) ;
    } else { // Direct3D
       float cosOuter = pow(cosDelta, 1.01 + LightSource.spotExponent / 2);
       spotFacteur = smoothstep(cosOuter, cosDelta, cosGamma);
@@ -105,21 +106,27 @@ void main( void )
       FragColor = vec4(AttribsIn.normal, 1.f);
       return;
    }
-
-   if (typeIllumination == 0) {
-      FragColor = AttribsIn.couleur;
-   } else {    
       vec3 O = normalize(-AttribsIn.pos);
       vec3 N = AttribsIn.normal;
-
-      FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
-
+   if (typeIllumination == 0) 
+   {
+      FragColor = AttribsIn.couleur;
+   } 
+   else 
+   {    
+    FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
       for (int i = 0; i < 2; i++) {
          vec3 L = normalize( vec3(matrVisu * LightSource.position[i]).xyz - AttribsIn.pos);
          vec3 D = normalize(transpose(inverse(mat3(matrVisu)))*(-LightSource.spotDirection[i]));
          FragColor += calculerReflexion(L, N, O)*calculerSpot(D, L); 
-      }
-
+      }  
+        if ( texnumero != 0 )   {
+            if(texture(laTexture, AttribsIn.texCoord) != vec4(0.0,0.0,0.0,0.0) ){
+                 FragColor += texture(laTexture, AttribsIn.texCoord);
+            }
+        }
+        else 
+            vec4(1.0);      
       FragColor += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
       FragColor = clamp( FragColor, 0.0, 1.0 );
    }
