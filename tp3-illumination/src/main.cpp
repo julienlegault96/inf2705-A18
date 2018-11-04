@@ -421,12 +421,33 @@ void FenetreTP::initialiser()
 
    GLfloat texcooqdice[2*4*6] =
    {
-      +1.00, +0.33,       +0.66, +0.33,        +1.00, +0.00,        +0.66, +0.00,            // 6
-      +0.66, +0.66,       +0.66, +0.33,        +1.00, +0.66,        +1.00, +0.33,            // 5
-      +0.33, +0.66,       +0.66, +0.66,        +0.33, +1.00,        +0.66, +1.00,            // 4
-      +0.33, +0.33,       +0.33, +0.66,        +0.00, +0.33,        +0.00, +0.66,            // 2   
-      +0.66, +0.33,       +0.33, +0.33,        +0.66, +0.00,        +0.33, +0.00,            // 3
-      +0.33, +0.33,       +0.66, +0.33,        +0.33, +0.66,        +0.66, +0.66,            // 1 
+      +1.00, +0.33,       +0.66, +0.33,        +1.00, +0.00,        +0.66, +0.00,
+      +0.66, +0.66,       +0.66, +0.33,        +1.00, +0.66,        +1.00, +0.33,
+      +0.33, +0.66,       +0.66, +0.66,        +0.33, +1.00,        +0.66, +1.00,
+      +0.33, +0.33,       +0.33, +0.66,        +0.00, +0.33,        +0.00, +0.66, 
+      +0.66, +0.33,       +0.33, +0.33,        +0.66, +0.00,        +0.33, +0.00,
+      +0.33, +0.33,       +0.66, +0.33,        +0.33, +0.66,        +0.66, +0.66,
+   };
+
+  GLfloat texcooqchest[2*4*6] =
+   {
+      +3.00, +3.00,       +0.00, +3.00,        +3.00, +0.00,        +0.00, +0.00,
+      +3.00, +3.00,       +0.00, +3.00,        +3.00, +0.00,        +0.00, +0.00,
+      +0.00, +3.00,       +0.00, +0.00,        +3.00, +3.00,        +3.00, +0.00,
+      +0.00, +0.00,       +3.00, +0.00,        +0.00, +3.00,        +3.00, +3.00,
+      +3.00, +0.00,       +3.00, +3.00,        +0.00, +0.00,        +0.00, +3.00,
+      +0.00, +0.00,       +3.00, +0.00,        +0.00, +3.00,        +3.00, +3.00,
+   };
+
+
+   GLfloat texcooqM[2*4*6] =
+   {
+      +1.00, +1.00,       +0.00, +1.00,        +1.00, +0.00,        +0.00, +0.00,
+      +1.00, +1.00,       +0.00, +1.00,        +1.00, +0.00,        +0.00, +0.00,
+      +0.00, +1.00,       +0.00, +0.00,        +1.00, +1.00,        +1.00, +0.00,
+      +0.00, +0.00,       +1.00, +0.00,        +0.00, +1.00,        +1.00, +1.00,
+      +1.00, +0.00,       +1.00, +1.00,        +0.00, +0.00,        +0.00, +1.00,
+      +0.00, +0.00,       +1.00, +0.00,        +0.00, +1.00,        +1.00, +1.00,
    };
 
    // allouer les objets OpenGL
@@ -448,12 +469,20 @@ void FenetreTP::initialiser()
    glEnableVertexAttribArray( locNormal );
 
    // partie 3: charger le VBO pour les coordonnées de texture
+   
+   //de   
    glBindBuffer( GL_ARRAY_BUFFER, vbo[2] );
    glBufferData( GL_ARRAY_BUFFER, sizeof(texcooqdice), texcooqdice, GL_STATIC_DRAW );
-   glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
-   glEnableVertexAttribArray( locTexCoord );
+
+   //echiquier   
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[3] );
+   glBufferData( GL_ARRAY_BUFFER, sizeof(texcooqchest), texcooqchest, GL_STATIC_DRAW );
+
+   // mosaique et  metal
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[4] );
+   glBufferData( GL_ARRAY_BUFFER, sizeof(texcooqM), texcooqM, GL_STATIC_DRAW );
    
-   //glBindVertexArray(0);
+   glBindVertexArray(0);
 
    // initialiser le VAO pour une ligne (montrant la direction du spot)
    glGenBuffers( 1, &vboLumi );
@@ -492,26 +521,43 @@ void FenetreTP::conclure()
 void afficherModele()
 {
    // partie 3: paramètres de texture
+   glBindVertexArray( vao[0] );
    switch ( varsUnif.texnumero )
    {
    default:
       //std::cout << "Sans texture" << std::endl;
-      glBindTexture( GL_TEXTURE_2D, 0);      
+      glBindTexture( GL_TEXTURE_2D, 0);
       break;
    case 1:
       //std::cout << "Texture 1 DE" << std::endl;
-      glBindTexture( GL_TEXTURE_2D, textures[0]);
+      glBindTexture( GL_TEXTURE_2D, textures[0] );
+      glBindBuffer( GL_ARRAY_BUFFER, vbo[2] );
+      glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+      glEnableVertexAttribArray(locTexCoord);      
       break;
    case 2:
       //std::cout << "Texture 2 ECHIQUIER" << std::endl;
+      glBindTexture( GL_TEXTURE_2D, textures[1] );
+      glBindBuffer( GL_ARRAY_BUFFER, vbo[3] );
+      glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+      glEnableVertexAttribArray(locTexCoord);
       break;
    case 3:
       //std::cout << "Texture 3 METAL" << std::endl;
+      glBindTexture( GL_TEXTURE_2D, textures[2]);
+      glBindBuffer( GL_ARRAY_BUFFER, vbo[4] );
+      glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+      glEnableVertexAttribArray(locTexCoord);
       break;
    case 4:
       //std::cout << "Texture 4 MOSAIQUE" << std::endl;
+      glBindTexture( GL_TEXTURE_2D, textures[3]);
+      glBindBuffer( GL_ARRAY_BUFFER, vbo[4] );
+      glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+      glEnableVertexAttribArray(locTexCoord);
       break;
    }
+   
 
    // Dessiner le modèle
    matrModel.PushMatrix(); {
