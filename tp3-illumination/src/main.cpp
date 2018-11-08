@@ -181,10 +181,10 @@ void calculerPhysique( )
       // De temps à autre, alterner entre le modèle d'illumination: Gouraud, Phong
       static float type = 0;
       type += 0.005;
-      varsUnif.typeIllumination = fmod(type,2);
+      varsUnif.typeIllumination = fmod(type, 2);
 
       // De temps à autre, alterner entre colorer selon couleur ou non
-      varsUnif.utiliseCouleur = fmod(type+0.017,2);
+      varsUnif.utiliseCouleur = fmod(type + 0.017, 2);
    }
 
    camera.verifierAngles();
@@ -255,7 +255,9 @@ void chargerNuanceurs()
       prog = glCreateProgram();
 
       // attacher le nuanceur de sommets
-      const GLchar *chainesSommets = ProgNuanceur::lireNuanceur( "nuanceurSommets.glsl" );
+      const GLchar *chainesSommets = Etat::utiliseTess ? ProgNuanceur::lireNuanceur( "nuanceurSommetsTess.glsl" ) : 
+                                                         ProgNuanceur::lireNuanceur( "nuanceurSommets.glsl" );
+
       if ( chainesSommets != NULL )
       {
          GLuint nuanceurObj = glCreateShader( GL_VERTEX_SHADER );
@@ -267,7 +269,6 @@ void chargerNuanceurs()
       }
       if ( Etat::utiliseTess )
       {
-         // partie 4: À ACTIVER (touche '9')
          // attacher le nuanceur de controle de la tessellation
          const GLchar *chainesTessCtrl = ProgNuanceur::lireNuanceur( "nuanceurTessCtrl.glsl" );
          if ( chainesTessCtrl != NULL )
@@ -578,9 +579,16 @@ void afficherModele()
       case 1:
          // afficher le cube
          glBindVertexArray( vao[0] );
+
          if ( Etat::utiliseTess )
          {
-            // partie 4: afficher le cube avec des GL_PATCHES
+            // afficher le cube avec des GL_PATCHES
+            glDrawArrays( GL_PATCHES,  0, 4 );
+            glDrawArrays( GL_PATCHES,  4, 4 );
+            glDrawArrays( GL_PATCHES,  8, 4 );
+            glDrawArrays( GL_PATCHES, 12, 4 );
+            glDrawArrays( GL_PATCHES, 16, 4 );
+            glDrawArrays( GL_PATCHES, 20, 4 );
          }
          else
          {
@@ -676,13 +684,13 @@ void FenetreTP::afficherScene()
       {
          matrProj.Ortho( -d, d,
                          -d*(GLdouble)hauteur_ / (GLdouble)largeur_,
-                         d*(GLdouble)hauteur_ / (GLdouble)largeur_,
+                          d*(GLdouble)hauteur_ / (GLdouble)largeur_,
                          0.1, 60.0 );
       }
       else
       {
          matrProj.Ortho( -d*(GLdouble)largeur_ / (GLdouble)hauteur_,
-                         d*(GLdouble)largeur_ / (GLdouble)hauteur_,
+                          d*(GLdouble)largeur_ / (GLdouble)hauteur_,
                          -d, d,
                          0.1, 60.0 );
       }
