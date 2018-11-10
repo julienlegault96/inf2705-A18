@@ -74,6 +74,8 @@ AttribsOut;
 void main(void) {
   // transformation standard du sommet
   gl_Position = matrProj * matrVisu * matrModel * Vertex;
+
+  AttribsOut.couleur = vec4(0.0, 0.0, 0.0, 1.0);
   AttribsOut.normal = normalize(matrNormale * Normal);
   AttribsOut.pos = vec3(matrVisu * matrModel * Vertex);
   AttribsOut.texCoord = TexCoord.st;

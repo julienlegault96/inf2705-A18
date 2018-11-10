@@ -80,6 +80,7 @@ float calculerSpot(in vec3 D, in vec3 L) {
     float cosOuter = pow(cosDelta, 1.01 + LightSource.spotExponent / 2);
     spotFacteur = smoothstep(cosOuter, cosDelta, cosGamma);
   }
+
   return spotFacteur;
 }
 
@@ -121,8 +122,8 @@ void main(void) {
   if (typeIllumination == 0) {
     AttribsOut.couleur = vec4(0.f, 0.f, 0.f, 1.f);
     for (int i = 0; i < 2; i++) {
-      vec3 L = normalize(vec3(matrVisu * LightSource.position[i]).xyz - pos);
-      vec3 D = normalize(transpose(inverse(mat3(matrVisu))) * (-LightSource.spotDirection[i]));
+      vec3 L = normalize( vec3(matrVisu * LightSource.position[i]).xyz - pos );
+      vec3 D = normalize( transpose(inverse(mat3(matrVisu))) * (-LightSource.spotDirection[i]) );
       AttribsOut.couleur += calculerReflexion(L, N, O) * calculerSpot(D, L);
     }
     AttribsOut.couleur += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;

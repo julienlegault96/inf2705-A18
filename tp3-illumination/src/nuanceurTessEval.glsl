@@ -145,15 +145,15 @@ vec4 calculerReflexion(in vec3 L, in vec3 N, in vec3 O) {
 void main()
 {
    gl_Position = interpole( gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[3].gl_Position, gl_in[2].gl_Position );
-   vec3 pos = interpole( AttribsIn[0].pos, AttribsIn[1].pos, AttribsIn[3].pos, AttribsIn[2].pos);
+   vec3 pos = interpole( AttribsIn[0].pos, AttribsIn[1].pos, AttribsIn[3].pos, AttribsIn[2].pos );
    vec3 O = normalize(-pos);
-   vec3 N = interpole( AttribsIn[0].normal, AttribsIn[1].normal, AttribsIn[3].normal, AttribsIn[2].normal);
+   vec3 N = interpole( AttribsIn[0].normal, AttribsIn[1].normal, AttribsIn[3].normal, AttribsIn[2].normal );
 
    if (typeIllumination == 0) {
       AttribsOut.couleur = vec4(0.f, 0.f, 0.f, 1.f);
       for (int i = 0; i < 2; i++) {
-         vec3 L = normalize(vec3(matrVisu * LightSource.position[i]).xyz - pos);
-         vec3 D = normalize(transpose(inverse(mat3(matrVisu))) * (-LightSource.spotDirection[i]));
+         vec3 L = normalize( vec3(matrVisu * LightSource.position[i]).xyz - pos );
+         vec3 D = normalize( transpose(inverse(mat3(matrVisu))) * (-LightSource.spotDirection[i]) );
          AttribsOut.couleur += calculerReflexion(L, N, O) * calculerSpot(D, L);
       }
       AttribsOut.couleur += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
@@ -161,5 +161,5 @@ void main()
    }
    AttribsOut.normal = N;
    AttribsOut.pos = pos;
-   AttribsOut.texCoord = interpole( AttribsIn[0].texCoord, AttribsIn[1].texCoord, AttribsIn[3].texCoord, AttribsIn[2].texCoord);
+   AttribsOut.texCoord = interpole( AttribsIn[0].texCoord, AttribsIn[1].texCoord, AttribsIn[3].texCoord, AttribsIn[2].texCoord );
 }
