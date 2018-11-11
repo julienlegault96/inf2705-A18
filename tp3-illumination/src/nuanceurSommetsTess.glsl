@@ -57,26 +57,25 @@ uniform float facteurDeform;
 
 /////////////////////////////////////////////////////////////////
 
-in vec4 Vertex;
-in vec3 Normal;
-in vec4 Color;
-in vec4 TexCoord;
+layout(location=0) in vec4 Vertex;
+layout(location=2) in vec3 Normal;
+layout(location=3) in vec4 Color;
+layout(location=8) in vec4 TexCoord;
 
 out Attribs {
-  vec4 couleur;
+  vec4 pos;
   vec3 normal;
-  vec3 pos;
-  vec2 texCoord;
+  vec4 couleur;
+  vec4 texCoord;
 }
 AttribsOut;
 
 
 void main(void) {
   // transformation standard du sommet
-  gl_Position = matrProj * matrVisu * matrModel * Vertex;
-
-  AttribsOut.couleur = vec4(0.0, 0.0, 0.0, 1.0);
-  AttribsOut.normal = normalize(matrNormale * Normal);
-  AttribsOut.pos = vec3(matrVisu * matrModel * Vertex);
-  AttribsOut.texCoord = TexCoord.st;
+  // gl_Position = matrModel * Vertex;
+  AttribsOut.normal = Normal;
+  AttribsOut.couleur = Color;
+  AttribsOut.texCoord = TexCoord;
+  AttribsOut.pos = Vertex;
 }

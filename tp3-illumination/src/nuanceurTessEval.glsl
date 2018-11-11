@@ -58,43 +58,39 @@ uniform mat3 matrNormale;
 layout(quads) in;
 
 in Attribs {
-  vec4 couleur;
+  vec4 pos;
   vec3 normal;
-  vec3 pos;
-  vec2 texCoord;
+  vec4 couleur;
+  vec4 texCoord;
 } AttribsIn[];
 
 out Attribs {
-  vec4 couleur;
-  vec3 normal;
   vec3 pos;
+  vec3 normal;
+  vec4 couleur;
   vec2 texCoord;
 } AttribsOut;
 
 float interpole( float v0, float v1, float v2, float v3 )
 {
-   // mix( x, y, f ) = x * (1-f) + y * f.
    float v01 = mix( v0, v1, gl_TessCoord.x );
    float v32 = mix( v3, v2, gl_TessCoord.x );
    return mix( v01, v32, gl_TessCoord.y );
 }
 vec2 interpole( vec2 v0, vec2 v1, vec2 v2, vec2 v3 )
 {
-   // mix( x, y, f ) = x * (1-f) + y * f.
    vec2 v01 = mix( v0, v1, gl_TessCoord.x );
    vec2 v32 = mix( v3, v2, gl_TessCoord.x );
    return mix( v01, v32, gl_TessCoord.y );
 }
 vec3 interpole( vec3 v0, vec3 v1, vec3 v2, vec3 v3 )
 {
-   // mix( x, y, f ) = x * (1-f) + y * f.
    vec3 v01 = mix( v0, v1, gl_TessCoord.x );
    vec3 v32 = mix( v3, v2, gl_TessCoord.x );
    return mix( v01, v32, gl_TessCoord.y );
 }
 vec4 interpole( vec4 v0, vec4 v1, vec4 v2, vec4 v3 )
 {
-   // mix( x, y, f ) = x * (1-f) + y * f.
    vec4 v01 = mix( v0, v1, gl_TessCoord.x );
    vec4 v32 = mix( v3, v2, gl_TessCoord.x );
    return mix( v01, v32, gl_TessCoord.y );
@@ -144,10 +140,18 @@ vec4 calculerReflexion(in vec3 L, in vec3 N, in vec3 O) {
 
 void main()
 {
-   gl_Position = interpole( gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[3].gl_Position, gl_in[2].gl_Position );
-   vec3 pos = interpole( AttribsIn[0].pos, AttribsIn[1].pos, AttribsIn[3].pos, AttribsIn[2].pos );
-   vec3 O = normalize(-pos);
-   vec3 N = interpole( AttribsIn[0].normal, AttribsIn[1].normal, AttribsIn[3].normal, AttribsIn[2].normal );
+   // gl_Position = interpole( gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[3].gl_Position, gl_in[2].gl_Position )
+    vec4 couleur = interpole( AttribsIn[0].couleur, AttribsIn[1].couleur, AttribsIn[3].couleur, AttribsIn[2].couleur );
+    vec3 normal = interpole( AttribsIn[0].normal, AttribsIn[1].normal, AttribsIn[3].normal, AttribsIn[2].normal );
+    vec4 Vertex = interpole( AttribsIn[0].pos, AttribsIn[1].pos, AttribsIn[3].pos, AttribsIn[2].pos );
+    vec4 texCoord = interpole( AttribsIn[0].texCoord, AttribsIn[1].texCoord, AttribsIn[3].texCoord, AttribsIn[2].texCoord );
+
+    gl_Position = matrProj * matrVisu * matrModel * Vertex;
+    AttribsOut.texCoord = texCoord.st;
+
+    vec3 pos = vec3(matrVisu * matrModel * Vertex);
+    vec3 O = normalize(-pos);
+    vec3 N = normalize(matrNormale * normal);
 
    if (typeIllumination == 0) {
       AttribsOut.couleur = vec4(0.f, 0.f, 0.f, 1.f);
@@ -159,7 +163,7 @@ void main()
       AttribsOut.couleur += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
       AttribsOut.couleur = clamp(AttribsOut.couleur, 0.0, 1.0);
    }
+
    AttribsOut.normal = N;
    AttribsOut.pos = pos;
-   AttribsOut.texCoord = interpole( AttribsIn[0].texCoord, AttribsIn[1].texCoord, AttribsIn[3].texCoord, AttribsIn[2].texCoord );
 }

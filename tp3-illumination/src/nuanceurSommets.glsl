@@ -56,15 +56,15 @@ uniform mat3 matrNormale;
 
 /////////////////////////////////////////////////////////////////
 
-in vec4 Vertex;
-in vec3 Normal;
-in vec4 Color;
-in vec4 TexCoord;
+layout(location=0) in vec4 Vertex;
+layout(location=2) in vec3 Normal;
+layout(location=3) in vec4 Color;
+layout(location=8) in vec4 TexCoord;
 
 out Attribs {
-  vec4 couleur;
-  vec3 normal;
   vec3 pos;
+  vec3 normal;
+  vec4 couleur;
   vec2 texCoord;
 }
 AttribsOut;
@@ -115,6 +115,7 @@ vec4 calculerReflexion(in vec3 L, in vec3 N, in vec3 O) {
 void main(void) {
   // transformation standard du sommet
   gl_Position = matrProj * matrVisu * matrModel * Vertex;
+  AttribsOut.texCoord = TexCoord.st;
   vec3 pos = vec3(matrVisu * matrModel * Vertex);
   vec3 O = normalize(-pos);
   vec3 N = normalize(matrNormale * Normal);
@@ -129,7 +130,8 @@ void main(void) {
     AttribsOut.couleur += FrontMaterial.emission + FrontMaterial.ambient * LightModel.ambient;
     AttribsOut.couleur = clamp(AttribsOut.couleur, 0.0, 1.0);
   }
+  else {
   AttribsOut.normal = N;
   AttribsOut.pos = pos;
-  AttribsOut.texCoord = TexCoord.st;
+  }
 }

@@ -56,9 +56,9 @@ uniform mat4 matrVisu;
 /////////////////////////////////////////////////////////////////
 
 in Attribs {
-  vec4 couleur;
-  vec3 normal;
   vec3 pos;
+  vec3 normal;
+  vec4 couleur;
   vec2 texCoord;
 }
 AttribsIn;
