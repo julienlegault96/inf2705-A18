@@ -22,7 +22,6 @@ GLint locmatrVisu = -1;
 GLint locmatrProj = -1;
 GLint locmatrNormale = -1;
 GLint loclaTexture = -1;
-GLint locfacteurDeform = -1;
 GLint locTessLevelInner = -1;
 GLint locTessLevelOuter = -1;
 GLuint indLightSource;
@@ -320,7 +319,6 @@ void chargerNuanceurs()
       // partie 4:
       if ( Etat::utiliseTess )
       {
-         if ( (locfacteurDeform  = glGetUniformLocation(prog, "facteurDeform")) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de facteurDeform" << std::endl;
          if ( (locTessLevelInner = glGetUniformLocation(prog, "TessLevelInner")) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de TessLevelInner (partie 4)" << std::endl;
          if ( (locTessLevelOuter = glGetUniformLocation(prog, "TessLevelOuter")) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de TessLevelOuter (partie 4)" << std::endl;
       }
@@ -571,7 +569,7 @@ void afficherModele()
       glm::mat3 matrNormale = glm::inverse( matrVM );
       glUniformMatrix3fv( locmatrNormale, 1, GL_TRUE, glm::value_ptr( matrNormale ) );
 
-      glPatchParameteri( GL_PATCH_VERTICES, 4 );
+      glPatchParameteri( GL_PATCH_VERTICES,  );
       switch ( Etat::modele )
       {
       default:
@@ -742,7 +740,6 @@ void FenetreTP::afficherScene()
    glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
    //glActiveTexture( GL_TEXTURE0 ); // activer la texture '0' (valeur de défaut)
    glUniform1i( loclaTexture, 0 ); // '0' => utilisation de GL_TEXTURE0
-   glUniform1f( locfacteurDeform, Etat::facteurDeform );
    glUniform1f( locTessLevelInner, Etat::TessLevelInner );
    glUniform1f( locTessLevelOuter, Etat::TessLevelOuter );
 

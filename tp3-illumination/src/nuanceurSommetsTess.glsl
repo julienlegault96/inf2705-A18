@@ -53,7 +53,6 @@ uniform mat4 matrModel;
 uniform mat4 matrVisu;
 uniform mat4 matrProj;
 uniform mat3 matrNormale;
-uniform float facteurDeform;
 
 /////////////////////////////////////////////////////////////////
 
