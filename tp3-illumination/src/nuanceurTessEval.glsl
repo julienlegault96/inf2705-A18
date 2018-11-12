@@ -140,7 +140,6 @@ vec4 calculerReflexion(in vec3 L, in vec3 N, in vec3 O) {
 
 void main()
 {
-   // gl_Position = interpole( gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[3].gl_Position, gl_in[2].gl_Position )
     vec4 couleur = interpole( AttribsIn[0].couleur, AttribsIn[1].couleur, AttribsIn[3].couleur, AttribsIn[2].couleur );
     vec3 normal = interpole( AttribsIn[0].normal, AttribsIn[1].normal, AttribsIn[3].normal, AttribsIn[2].normal );
     vec4 Vertex = interpole( AttribsIn[0].pos, AttribsIn[1].pos, AttribsIn[3].pos, AttribsIn[2].pos );

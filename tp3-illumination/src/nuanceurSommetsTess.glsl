@@ -73,7 +73,6 @@ AttribsOut;
 
 void main(void) {
   // transformation standard du sommet
-  // gl_Position = matrModel * Vertex;
   AttribsOut.normal = Normal;
   AttribsOut.couleur = Color;
   AttribsOut.texCoord = TexCoord;
