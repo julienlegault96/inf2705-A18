@@ -110,25 +110,41 @@ void calculerPhysique( )
 {
     if ( Etat::enmouvement )
     {
-        // À MODIFIER (partie 1)
-        // déplacer les particules en utilisant le nuanceur de rétroaction
         glUseProgram( progRetroaction );
-        // ... (MODIFIER)
-        // glUniform...
-        // glBindBufferBase(...);
 
+        // variable uniformes
+        glUniform3fv( locbDimRetroaction, 1, glm::value_ptr(Etat::bDim) );
+        glUniform3fv( locposPuitsRetroaction, 1, glm::value_ptr(Etat::posPuits) );
+        glUniform1f( loctempsRetroaction, parametre.temps );
+        glUniform1f( locdtRetroaction, parametre.dt );
+        glUniform1f( loctempsMaxRetroaction, parametre.tempsMax );
+        glUniform1f( locgraviteRetroaction, parametre.gravite );
+
+        glBindBufferBase( GL_TRANSFORM_FEEDBACK_BUFFER, 0, vbo[1] );
+        
+        glBindVertexArray( vao[1] );
+        glBindBuffer( GL_ARRAY_BUFFER, vbo[0] );
+
+        glVertexAttribPointer( locpositionRetroaction,     3, GL_FLOAT, GL_FALSE, sizeof(Particule), reinterpret_cast<void*>(offsetof(Particule, position)) );
+        glVertexAttribPointer( loccouleurRetroaction,      4, GL_FLOAT, GL_FALSE, sizeof(Particule), reinterpret_cast<void*>(offsetof(Particule,couleur)) );
+        glVertexAttribPointer( locvitesseRetroaction,      3, GL_FLOAT, GL_FALSE, sizeof(Particule), reinterpret_cast<void*>(offsetof(Particule,vitesse)) );
+        glVertexAttribPointer( loctempsRestantRetroaction, 1, GL_FLOAT, GL_FALSE, sizeof(Particule), reinterpret_cast<void*>(offsetof(Particule,tempsRestant)) );
 
         // débuter la requête (si impression)
-        if ( Etat::impression )
+        if ( Etat::impression ) {
             glBeginQuery( GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, requete );
+        }            
 
-        // « dessiner »
-        // ... (MODIFIER)
-        // glDrawArrays( GL_POINTS, ... );
+        glEnable( GL_RASTERIZER_DISCARD );
+        glBeginTransformFeedback( GL_POINTS );
+        glDrawArrays( GL_POINTS, 0, parametre.nparticules );
+        glEndTransformFeedback();
+        glDisable( GL_RASTERIZER_DISCARD );
 
         // terminer la requête (si impression)
-        if ( Etat::impression )
+        if ( Etat::impression ) {
             glEndQuery( GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN );
+        }
 
         glBindVertexArray( 0 );              // désélectionner le VAO
 
@@ -357,8 +373,8 @@ void chargerNuanceurs()
         }
 
         // À MODIFIER (partie 1)
-        //const GLchar* vars[] = { ... };
-        //glTransformFeedbackVaryings( progRetroaction, sizeof(vars)/sizeof(vars[0]), vars, GL_INTERLEAVED_ATTRIBS );
+        const GLchar* vars[] = { "positionMod", "couleurMod", "vitesseMod", "tempsRestantMod" };
+        glTransformFeedbackVaryings( progRetroaction, sizeof(vars)/sizeof(vars[0]), vars, GL_INTERLEAVED_ATTRIBS );
 
         // faire l'édition des liens du programme
         glLinkProgram( progRetroaction );
@@ -491,7 +507,7 @@ void afficherDecoration()
         disque->afficher();
         // les faces arrières de la demi-sphère qui sert de boîte
         glEnable( GL_CULL_FACE );
-        glCullFace( GL_FRONT ); // on enlève les faces avant pour ne garder que les faces arrières
+        glCullFace( GL_FRONT );
         glVertexAttrib3f( locColorBase, 0.4, 0.4, 0.5 );
         demisphere->afficher();
         glDisable( GL_CULL_FACE );
