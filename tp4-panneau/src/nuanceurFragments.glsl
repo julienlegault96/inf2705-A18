@@ -5,16 +5,22 @@ uniform int texnumero;
 
 in Attribs {
     vec4 couleur;
+    vec2 texCoord;
 } AttribsIn;
 
 out vec4 FragColor;
 
 void main( void )
 {
-    // Mettre un test bidon afin que l'optimisation du compilateur n'élimine l'attribut "couleur".
-    // Vous ENLEVEREZ cet énoncé inutile!
-    if ( AttribsIn.couleur.r + texnumero + texture(laTexture,vec2(0.0)).r < 0.0 ) discard;
+    if (texnumero == 0) {
+        FragColor = AttribsIn.couleur;
+        return;
+    }
 
-    //FragColor = texture( laTexture, gl_PointCoord );
-    FragColor = AttribsIn.couleur;
+    vec4 texColor = texture(laTexture, AttribsIn.texCoord);
+    if ( texColor.a < 0.1 ) {
+        discard;
+    }
+    
+    FragColor = mix(AttribsIn.couleur, texColor, 0.7);
 }

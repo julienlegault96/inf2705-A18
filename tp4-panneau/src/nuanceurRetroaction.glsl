@@ -39,7 +39,7 @@ void main( void )
         vitesseMod = vec3( mix( -0.5, 0.5, myrandom(seed++) ),   // entre -0.5 et 0.5
                            mix( -0.5, 0.5, myrandom(seed++) ),   // entre -0.5 et 0.5
                            mix(  0.5, 1.0, myrandom(seed++) ) ); // entre  0.5 et 1
-                           
+
         // nouveau temps de vie
         tempsRestantMod = myrandom(seed++) * tempsMax;
 
@@ -70,10 +70,10 @@ void main( void )
 
         float dist = length ( posSphUnitaire );
         if ( dist >= 1.0 ) {
-            positionMod = ( 2.0 - dist ) * positionMod ;
-            vec3 N = posSphUnitaire / dist ; // normaliser N
+            positionMod = ( 2.0 - dist ) * positionMod;
+            vec3 N = posSphUnitaire / dist;
             vec3 vitReflechieSphUnitaire = reflect ( vitSphUnitaire , N );
-            vitesseMod = vitReflechieSphUnitaire / bDim ;
+            vitesseMod = vitReflechieSphUnitaire / bDim;
         }
 
         // collision avec le sol ?
