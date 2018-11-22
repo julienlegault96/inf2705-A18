@@ -372,7 +372,6 @@ void chargerNuanceurs()
             delete [] chainesSommets;
         }
 
-        // À MODIFIER (partie 1)
         const GLchar* vars[] = { "positionMod", "couleurMod", "vitesseMod", "tempsRestantMod" };
         glTransformFeedbackVaryings( progRetroaction, sizeof(vars)/sizeof(vars[0]), vars, GL_INTERLEAVED_ATTRIBS );
 

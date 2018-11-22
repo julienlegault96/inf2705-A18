@@ -29,8 +29,7 @@ float myrandom( uint seed ) // entre  0 et 1
 
 void main( void )
 {
-    if ( tempsRestant <= 0.0 )
-    {
+    if ( tempsRestant <= 0.0 ) {
         // se préparer à produire une valeur un peu aléatoire
         uint seed = uint(temps * 1000.0) + uint(gl_VertexID);
         // faire renaitre la particule au puits
@@ -40,7 +39,7 @@ void main( void )
         vitesseMod = vec3( mix( -0.5, 0.5, myrandom(seed++) ),   // entre -0.5 et 0.5
                            mix( -0.5, 0.5, myrandom(seed++) ),   // entre -0.5 et 0.5
                            mix(  0.5, 1.0, myrandom(seed++) ) ); // entre  0.5 et 1
-
+                           
         // nouveau temps de vie
         tempsRestantMod = myrandom(seed++) * tempsMax;
 
@@ -66,9 +65,15 @@ void main( void )
         couleurMod = couleur;
 
         // collision avec la demi-sphère ?
-        if (distance(positionMod, vec3(0.0)) >= 1) {
-            vitesseMod.x = 0.0;
-            vitesseMod.y = 0.0;
+        vec3 posSphUnitaire = positionMod / bDim;
+        vec3 vitSphUnitaire = vitesseMod * bDim;
+
+        float dist = length ( posSphUnitaire );
+        if ( dist >= 1.0 ) {
+            positionMod = ( 2.0 - dist ) * positionMod ;
+            vec3 N = posSphUnitaire / dist ; // normaliser N
+            vec3 vitReflechieSphUnitaire = reflect ( vitSphUnitaire , N );
+            vitesseMod = vitReflechieSphUnitaire / bDim ;
         }
 
         // collision avec le sol ?
