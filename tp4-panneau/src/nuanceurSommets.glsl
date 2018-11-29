@@ -14,7 +14,7 @@ layout(location=5) in float tempsRestant;
 out Attribs {
     vec4 couleur;
     float tempsRestant;
-    //float sens; // du vol
+    float sens;
 } AttribsOut;
 
 void main( void )
@@ -27,10 +27,9 @@ void main( void )
     // couleur du sommet
     AttribsOut.couleur = Color;
 
+    // sens du vol par rapport a la camera
+    AttribsOut.sens = (matrVisu * vec4(vitesse, 1.0)).x;
+
     // assigner la taille des points (en pixels)
     gl_PointSize = pointsize;
-
-    // À SUPPRIMER: les lignes suivantes servent seulement à forcer le compilateur à conserver cet attribut
-    // Vous ENLEVEREZ cet énoncé inutile!
-    if ( tempsRestant < 0.0 ) { AttribsOut.couleur.rgb += 0.00001*vitesse; AttribsOut.couleur.a += 0.00001; }
 }
