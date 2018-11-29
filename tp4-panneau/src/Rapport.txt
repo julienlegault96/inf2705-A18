@@ -3,12 +3,25 @@ Indice: pour bien répondre à ces deux questions, essayez de voir si votre rép
 
 Q1: Dans la partie 1, des points de taille fixe sont affichés à l'écran. Leur taille est donnée par la variable gl_PointSize.
     i) Comment faire pour que la taille d'un point varie de façon inverse à sa distance du plan avant du volume de visualisation, c'est-à-dire qu'il soit plus gros lorsqu'il est plus près de la caméra ?
-    ii) Donnez l'énoncé GLSL que vous utiliseriez pour implanter ceci.
 
+    Réponse: Il faut diviser la variable pointsize passée en paramètre uniforme par la composante z (profondeur) du gl_Position du sommet après que la matrice de 
+             visualisation et de projection aient été appliquées.
+
+    ii) Donnez l'énoncé GLSL que vous utiliseriez pour implanter ceci.
+    
+    Réponse: gl_PointSize = pointsize / (matrProj * gl_Position).z;
+             (Dans notre nuanceur de sommet, la matrice de projection n'a pas encore été appliquée.)
 
 
 Q2: Pour afficher une étincelle qui tourne sur elle-même, on a appliqué une matrice de rotation sur les quatre sommets.
     i) Pourrait-on faire tourner l'étincelle en appliquant la même matrice de rotation sur les coordonnées de texture plutôt que sur les coordonnées des sommets?
+    
+    Réponse: Oui.
+    
     ii) Quel problème observerions-nous alors et comment devrait-il être corrigé?
 
-    Afin de facilement répondre à cette question, vous pouvez remplacer (temporairement!) l'image de l'étincelle de ce TP par l'image de l'échiquier du TP3.  Si vous appliquez ensuite la matrice de rotation sur les coordonnées de texture plutôt que sur les coordonnées des sommets, vous pourrez alors très bien voir ce qui se passe.
+    Réponse: L'image carrée est appliquée sur une particule carrée de même taille, ce qui fait que lorsqu'on fait tourner l'image sans tourner la particule,
+             les coins de l'images sont en dehors du carré de la particule et ne sont pas affichés. Des parties de l'image de l'étincelle sont donc parfois
+             coupées lors de la rotation et réapparaissent quelques instants plus tard. Une solution serait d'avoir plus de vide autour de la texture dans 
+             l'image afin qu'elle soit toujours affichée en entier peu importe la rotation. 
+
